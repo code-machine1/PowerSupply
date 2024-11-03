@@ -31,7 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -78,11 +78,13 @@ void Error_Handler(void);
 #define STM32_FLASH_START_ADDR        0x08000000
 #define STM32_PAGE_SIZES              1024
 #define STM32_PAGE_NUM                64
-#define STM32_A_PAGE_NUM              20
+#define STM32_A_PAGE_NUM              30
 #define STM32_B_PAGE_NUM              STM32_PAGE_NUM - STM32_A_PAGE_NUM
 #define STM32_A_START_PAGE_NUM        STM32_A_PAGE_NUM
 #define STM32_A_START__ADDR           STM32_FLASH_START_ADDR + STM32_A_START_PAGE_NUM * STM32_PAGE_SIZES
 #define OTA_UPDATA_STATUS             0x1234
+#define OTA_INFO_SIZE                 sizeof(OTA_Info)
+
 typedef struct
 {
     uint32_t ota_flag;

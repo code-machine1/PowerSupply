@@ -112,15 +112,17 @@ int main(void)
     BSP_W25Qx_Init();
     LCD_Init();//LCD≥ı ºªØ
     LCD_Fill(0,0,LCD_W,LCD_H,WHITE);
-    LCD_ShowString(40,0,(uint8_t *)"STM32 OTA",RED,WHITE,16,0);
-    LCD_ShowString(40,16,(uint8_t *)"Version:0.0",RED,WHITE,16,0);
+//    LCD_ShowString(40,0,(uint8_t *)"STM32 OTA",RED,WHITE,16,0);
+//    LCD_ShowString(40,16,(uint8_t *)"Version:0.0",RED,WHITE,16,0);
+
+      LCD_ShowString(40,0,(uint8_t *)"B side",RED,WHITE,16,0);
 //    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_SET);
     HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_SET);
     /* USER CODE END 2 */
 //    Store_Init();
 //    Store_Data[1]= OTA_UPDATA_STATUS;
 //    Store_Save();
-    OTA_Info_t.ota_flag = MyFLASH_ReadHalfWord(0x0800FC02);
+    wifi_printf("%x",STM32_A_START__ADDR);
     bootloader_judge();
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
