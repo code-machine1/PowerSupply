@@ -105,9 +105,12 @@ int main(void)
     MX_DMA_Init();
     MX_USART1_UART_Init();
     MX_USART2_UART_Init();
+    MX_SPI2_Init();
     /* USER CODE BEGIN 2 */
     __HAL_UART_ENABLE_IT(&huart2,UART_IT_IDLE);
     HAL_UART_Receive_DMA(&huart2,WIFI_RX_Data_t.rxdata_in->start,WIFI_RX_MAX);
+    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_RESET);
+    BSP_W25Qx_Init();
     LCD_Init();//LCD初始化
     LCD_Fill(0,0,LCD_W,LCD_H,WHITE);
     LCD_ShowString(40,20,(uint8_t *)"A side",RED,WHITE,16,0);
@@ -118,8 +121,21 @@ int main(void)
     while (1)
     {
         /* USER CODE END WHILE */
-        HAL_Delay(500);
-        HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
+        if(WIFI_RX_Data_t.rxdata_out != WIFI_RX_Data_t.rxdata_in)
+        {
+            wifi_printf("本次收到了%d字节数据\r\n",WIFI_RX_Data_t.rxdata_out->end -WIFI_RX_Data_t.rxdata_out->start+1);
+            for(uint8_t i=0; i<WIFI_RX_Data_t.rxdata_out->end -WIFI_RX_Data_t.rxdata_out->start+1; i++)
+            {
+                wifi_printf("%c",WIFI_RX_Data_t.rxdata_out->start[i]);
+            }
+            wifi_printf("\r\n");
+            WIFI_RX_Data_t.rxdata_out++;
+            if(WIFI_RX_Data_t.rxdata_out == WIFI_RX_Data_t.rxdata_end)
+            {
+                WIFI_RX_Data_t.rxdata_out = &WIFI_RX_Data_t.rxdata_block[0];
+            }
+
+        }
         /* USER CODE BEGIN 3 */
     }
     /* USER CODE END 3 */
@@ -202,20 +218,6 @@ void assert_failed(uint8_t *file, uint32_t line)
 
 
 
-//        if(WIFI_RX_Data_t.rxdata_out != WIFI_RX_Data_t.rxdata_in)
-//        {
-//            wifi_printf("本次收到了%d字节数据\r\n",WIFI_RX_Data_t.rxdata_out->end -WIFI_RX_Data_t.rxdata_out->start+1);
-//            for(uint8_t i=0; i<WIFI_RX_Data_t.rxdata_out->end -WIFI_RX_Data_t.rxdata_out->start+1; i++)
-//            {
-//                wifi_printf("%c",WIFI_RX_Data_t.rxdata_out->start[i]);
-//            }
-//            wifi_printf("\r\n");
-//            WIFI_RX_Data_t.rxdata_out++;
-//            if(WIFI_RX_Data_t.rxdata_out == WIFI_RX_Data_t.rxdata_end)
-//            {
-//                WIFI_RX_Data_t.rxdata_out = &WIFI_RX_Data_t.rxdata_block[0];
-//            }
 
-//        }
 
 //only for debug

@@ -287,7 +287,7 @@ void wifi_printf(char *format,...)
             ;
         HAL_UART_Transmit(&huart2,&WIFI_RX_Data_t.wifi_txbuff[i],1,HAL_MAX_DELAY);
     }
-    while(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TXE) != 1)
+    while(__HAL_UART_GET_FLAG(&huart2,UART_FLAG_TC) != 1)
         ;
 }
 

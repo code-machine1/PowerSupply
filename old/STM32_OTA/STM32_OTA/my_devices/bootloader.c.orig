@@ -30,13 +30,13 @@ void bootloader_judge(void)
         else
         {
             wifi_printf("跳转系统分区（A区）\r\n");
-            
+            bootloader_clear();
             lOAD_A(STM32_A_START__ADDR);
         }
 
     }
-    wifi_printf("进入bootloader命令行\r\n");
-    bootloader_info();
+        wifi_printf("进入bootloader命令行\r\n");
+        bootloader_info();
 
 
 }
@@ -76,9 +76,9 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
     }
     else if((1 == datalen) && ('7' == data[0]))
     {
-        wifi_printf("重启\r\n");
-        HAL_Delay(100);
-        NVIC_SystemReset();
+       wifi_printf("重启\r\n");
+       HAL_Delay(100);
+       NVIC_SystemReset();
     }
 }
 
@@ -92,14 +92,13 @@ void lOAD_A(uint32_t addr)
 {
     if((*(uint32_t *)addr >= 0x20000000) && (*(uint32_t *)addr <=  0x20004fff))
     {
-        bootloader_clear();
         MSR_SP(*(uint32_t *)addr);
         load_A = (load_a)*(uint32_t *)(addr+4);
         load_A();
     }
     else
     {
-        wifi_printf("跳转A区失败\r\n");
+     wifi_printf("跳转A区失败\r\n");
     }
 
 }

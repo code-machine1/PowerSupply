@@ -59,7 +59,9 @@ uint8_t ID[4];          //设备ID缓存数组
 uint32_t i;
 
 OTA_Info OTA_Info_t;
+UpData_Info UpData_Info_t;
 
+uint32_t boot_startflag;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,22 +114,60 @@ int main(void)
     BSP_W25Qx_Init();
     LCD_Init();//LCD初始化
     LCD_Fill(0,0,LCD_W,LCD_H,WHITE);
-//    LCD_ShowString(40,0,(uint8_t *)"STM32 OTA",RED,WHITE,16,0);
-//    LCD_ShowString(40,16,(uint8_t *)"Version:0.0",RED,WHITE,16,0);
-
-      LCD_ShowString(40,0,(uint8_t *)"B side",RED,WHITE,16,0);
-//    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_SET);
+    LCD_ShowString(40,0,(uint8_t *)"B side",RED,WHITE,16,0);
+    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_SET);
     /* USER CODE END 2 */
-//    Store_Init();
-//    Store_Data[1]= OTA_UPDATA_STATUS;
-//    Store_Save();
-    wifi_printf("%x",STM32_A_START__ADDR);
+
+    //writeota_flag(0x1034);
+    //writeota_flag(OTA_UPDATA_STATUS);
+    for(uint8_t i=0; i<11; i++)
+        OTA_Info_t.firelen[i]=0xff;
     bootloader_judge();
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
     {
+        if(WIFI_RX_Data_t.rxdata_out != WIFI_RX_Data_t.rxdata_in)
+        {
+            bootloader_event(WIFI_RX_Data_t.rxdata_out->start,WIFI_RX_Data_t.rxdata_out->end - WIFI_RX_Data_t.rxdata_out->start +1);
+            WIFI_RX_Data_t.rxdata_out++;
+            if(WIFI_RX_Data_t.rxdata_out == WIFI_RX_Data_t.rxdata_end)
+            {
+                WIFI_RX_Data_t.rxdata_out = &WIFI_RX_Data_t.rxdata_block[0];
+            }
+
+        }
+        
+        if(boot_startflag & UPDATA_A_FLAG)
+        {
+            wifi_printf("长度%d字节",OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]);
+            if(0 == OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 4)
+            {
+                for(uint8_t i=0; i<OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]/STM32_PAGE_SIZES; i++)
+                {
+                    BSP_W25Qx_Erase_Blocks(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
+                    BSP_W25Qx_Read(UpData_Info_t.Updatabuff,i*1024+UpData_Info_t.W25Q32_BlockNumber*64*1024,STM32_PAGE_SIZES);
+                    BSP_W25Qx_Write_Blocks(STM32_FLASH_START_ADDR + i * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,STM32_PAGE_SIZES);
+                }
+                if(OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 1024 == 0)
+                {
+                    BSP_W25Qx_Read(UpData_Info_t.Updatabuff,i*1024+UpData_Info_t.W25Q32_BlockNumber*64*1024,OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 1024);
+                    BSP_W25Qx_Write_Blocks(STM32_FLASH_START_ADDR + i * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 1024);
+                }
+                if(0 == OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber])
+                {
+                    writeota_flag(0);
+                }
+                NVIC_SystemReset();
+            }
+            else
+            {
+                wifi_printf("长度错误\r\n");
+                boot_startflag &=~ UPDATA_A_FLAG;
+            }
+
+        }
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */

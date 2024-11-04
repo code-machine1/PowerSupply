@@ -5,7 +5,7 @@
 #include "main.h"
 #include "stm32f1xx.h"
 #include "spi.h"
-	 
+#include "myflash.h"
 #define W25Q128FV_FLASH_SIZE                  0x1000000 /* 128 MBits => 16MBytes */
 #define W25Q128FV_SECTOR_SIZE                 0x10000   /* 256 sectors of 64KBytes */
 #define W25Q128FV_SUBSECTOR_SIZE              0x1000    /* 4096 subsectors of 4kBytes */
@@ -91,7 +91,8 @@ uint8_t BSP_W25Qx_Read(uint8_t* pData, uint32_t ReadAddr, uint32_t Size);
 uint8_t BSP_W25Qx_Write(uint8_t* pData, uint32_t WriteAddr, uint32_t Size);
 uint8_t BSP_W25Qx_Erase_Block(uint32_t Address);
 uint8_t BSP_W25Qx_Erase_Chip(void);
- 
+void BSP_W25Qx_Erase_Blocks(uint32_t start,uint16_t num);
+void BSP_W25Qx_Write_Blocks(uint32_t start_addr ,uint32_t *wdata,uint32_t num);
  
 #endif 
 

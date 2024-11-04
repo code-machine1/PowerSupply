@@ -118,6 +118,25 @@ uint8_t BSP_W25Qx_Read(uint8_t* pData, uint32_t ReadAddr, uint32_t Size)
 	return W25Qx_OK;
 }
  
+
+
+void BSP_W25Qx_Write_Blocks(uint32_t start_addr ,uint32_t *wdata,uint32_t num)
+{
+    while(num)
+    {
+        BSP_W25Qx_Write((uint8_t *)wdata,start_addr,1);
+        num-=4;
+        start_addr+=4;
+        wdata++;
+    } 
+
+
+}
+
+
+
+
+
  /**********************************************************************************
   * 函数功能: 写数据
   * 输入参数: 缓存数组指针、写地址、字节数
@@ -193,6 +212,26 @@ uint8_t BSP_W25Qx_Write(uint8_t* pData, uint32_t WriteAddr, uint32_t Size)
 	return W25Qx_OK;
 }
  
+
+
+
+void BSP_W25Qx_Erase_Blocks(uint32_t start,uint16_t num)
+{
+   uint16_t i=0;
+    for(i=0;i<num;i++)
+    {
+        //BSP_W25Qx_Erase_Block((0x08000000 + start * 1024)+(1024 * i));
+        
+        MyFLASH_ErasePage((0x08000000 + start * 1024)+(1024 * i));
+    }
+   
+
+}
+
+
+
+
+
  /**********************************************************************************
   * 函数功能: 扇区擦除
   * 输入参数: 地址

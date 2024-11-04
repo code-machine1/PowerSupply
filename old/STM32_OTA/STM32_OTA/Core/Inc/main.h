@@ -78,20 +78,30 @@ void Error_Handler(void);
 #define STM32_FLASH_START_ADDR        0x08000000
 #define STM32_PAGE_SIZES              1024
 #define STM32_PAGE_NUM                64
-#define STM32_A_PAGE_NUM              30
+#define STM32_A_PAGE_NUM              32
 #define STM32_B_PAGE_NUM              STM32_PAGE_NUM - STM32_A_PAGE_NUM
 #define STM32_A_START_PAGE_NUM        STM32_A_PAGE_NUM
 #define STM32_A_START__ADDR           STM32_FLASH_START_ADDR + STM32_A_START_PAGE_NUM * STM32_PAGE_SIZES
 #define OTA_UPDATA_STATUS             0x1234
 #define OTA_INFO_SIZE                 sizeof(OTA_Info)
+#define UPDATA_A_FLAG                 0x00000001
+
 
 typedef struct
 {
     uint32_t ota_flag;
-    
+    uint32_t firelen[11];
 }OTA_Info;
 
+typedef struct
+{
+    uint8_t Updatabuff[STM32_PAGE_SIZES];
+    uint32_t W25Q32_BlockNumber;
+}UpData_Info;
+
+extern UpData_Info UpData_Info_t;
 extern OTA_Info OTA_Info_t;
+extern uint32_t boot_startflag;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
