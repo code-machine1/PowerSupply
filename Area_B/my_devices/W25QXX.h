@@ -95,6 +95,7 @@ uint8_t BSP_W25Qx_Erase_Chip(void);
 void BSP_W25Qx_Erase_Blocks(uint32_t start,uint16_t num);
 uint8_t BSP_W25Qx_Erase_Block64K(uint8_t block_number);
 void BSP_W25Qx_Write_Blocks(uint32_t start_addr ,uint32_t *wdata,uint32_t num);
+uint8_t BSP_W25Qx_Page_Write(uint8_t* pData, uint16_t pagenumber);
 
 #endif
 

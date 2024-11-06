@@ -136,6 +136,59 @@ void BSP_W25Qx_Write_Blocks(uint32_t start_addr ,uint32_t *wdata,uint32_t num)
 
 
 
+uint8_t BSP_W25Qx_Page_Write(uint8_t* pData, uint16_t pagenumber)
+{
+    uint32_t tickstart = HAL_GetTick();
+    uint8_t wdata[4];
+    wdata[0] = 0x20;
+    wdata[1] = (pagenumber*256)>>16;
+    wdata[2] = (pagenumber*256)>>8;
+    wdata[3] = (pagenumber*256)>>0;
+    /* Wait the end of Flash writing */
+    while(BSP_W25Qx_GetStatus() == W25Qx_BUSY)
+        ;
+    {
+        /* Check for the Timeout */
+        if((HAL_GetTick() - tickstart) > W25Qx_TIMEOUT_VALUE)
+        {
+            return W25Qx_TIMEOUT;
+        }
+    }
+
+    BSP_W25Qx_WriteEnable();
+
+    /*Select the FLASH: Chip Select low */
+    W25Qx_Enable();
+
+    /* Send the command */
+    if (HAL_SPI_Transmit(&hspi2,wdata, 4, W25Qx_TIMEOUT_VALUE) != HAL_OK)
+    {
+        return W25Qx_ERROR;
+    }
+
+    /* Transmission of the data */
+    if (HAL_SPI_Transmit(&hspi2, pData,256, W25Qx_TIMEOUT_VALUE) != HAL_OK)
+    {
+        return W25Qx_ERROR;
+    }
+    W25Qx_Disable();
+    /* Wait the end of Flash writing */
+    while(BSP_W25Qx_GetStatus() == W25Qx_BUSY)
+        ;
+    {
+        /* Check for the Timeout */
+        if((HAL_GetTick() - tickstart) > W25Qx_TIMEOUT_VALUE)
+        {
+            return W25Qx_TIMEOUT;
+        }
+    }
+    return 0;
+}
+
+
+
+
+
 
 
 /**********************************************************************************

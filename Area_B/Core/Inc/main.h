@@ -78,14 +78,14 @@ void Error_Handler(void);
 #define STM32_FLASH_START_ADDR        0x08000000
 #define STM32_PAGE_SIZES              1024
 #define STM32_PAGE_NUM                64
-#define STM32_A_PAGE_NUM              32
+#define STM32_A_PAGE_NUM              36
 #define STM32_B_PAGE_NUM              STM32_PAGE_NUM - STM32_A_PAGE_NUM
 #define STM32_A_START_PAGE_NUM        STM32_A_PAGE_NUM
 #define STM32_A_START_ADDR            STM32_FLASH_START_ADDR + STM32_A_START_PAGE_NUM * STM32_PAGE_SIZES
-#define STM32_VERSION_ADDR            0x0800FFD0
+#define STM32_VERSION_ADDR            0x08008FF0
 #define OTA_UPDATA_STATUS             0x1234
 #define OTA_INFO_SIZE                 sizeof(OTA_Info)
-#define OTA_INFO_ADDR                 0x0800FFA0
+#define OTA_INFO_ADDR                 0x08008FC0
 #define UPDATA_A_FLAG                 0x00000001
 #define IAP_XMODEM_FLAG               0X00000002
 #define IAP_XMODEMDATA_FLAG           0X00000004

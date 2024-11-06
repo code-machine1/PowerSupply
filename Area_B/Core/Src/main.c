@@ -118,7 +118,7 @@ int main(void)
     LCD_ShowString(40,0,(uint8_t *)"B side",RED,WHITE,16,0);
     HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_SET);
-    read_otainfo();//上电读取一次当前版本号信息
+    
     bootloader_judge();
     /* USER CODE END 2 */
     /* Infinite loop */
@@ -138,16 +138,16 @@ int main(void)
         }
         if(boot_startflag & UPDATA_A_FLAG)
         {
-            wifi_printf("长度%d字节",OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]);
+            wifi_printf("长度%d字节\r\n",OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]);
             if(0 == OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 4)
             {
+                BSP_W25Qx_Erase_Blocks(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
                 for(uint8_t i=0; i<OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]/STM32_PAGE_SIZES; i++)
                 {
-                    BSP_W25Qx_Erase_Blocks(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
                     BSP_W25Qx_Read(UpData_Info_t.Updatabuff,i*1024+UpData_Info_t.W25Q32_BlockNumber*64*1024,STM32_PAGE_SIZES);
                     BSP_W25Qx_Write_Blocks(STM32_A_START_ADDR + i * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,STM32_PAGE_SIZES);
                 }
-                if(OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 1024 == 0)
+                if(0 != OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 1024 )
                 {
                     BSP_W25Qx_Read(UpData_Info_t.Updatabuff,i*1024+UpData_Info_t.W25Q32_BlockNumber*64*1024,OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 1024);
                     BSP_W25Qx_Write_Blocks(STM32_A_START_ADDR + i * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 1024);
@@ -158,6 +158,7 @@ int main(void)
                     write_otainfo();
                     boot_startflag &=~ UPDATA_A_FLAG;
                 }
+                wifi_printf("A区更新完毕\r\n");
                 NVIC_SystemReset();
             }
             else
