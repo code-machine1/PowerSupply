@@ -58,9 +58,8 @@ uint8_t rData[0x100];   //读缓存数组
 uint8_t ID[4];          //设备ID缓存数组
 uint32_t i;
 
-uint8_t testbuff[32]= {"VER-1.0.0-2024/11/5-11:00"};
-
 OTA_Info OTA_Info_t;
+
 UpData_Info UpData_Info_t;
 
 uint32_t boot_startflag;
@@ -119,14 +118,7 @@ int main(void)
     LCD_ShowString(40,0,(uint8_t *)"B side",RED,WHITE,16,0);
     HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_SET);
-
-//    for (uint16_t i = 0; i < 32; i ++)   
-//    {
-//        OTA_Info_t.ota_version[i] = MyFLASH_ReadHalfWord(STM32_VERSION_ADDR + i * 2);   
-//    }
-
-//    Store_Save_OTA_VER((uint16_t *)testbuff);
-//    while(1);
+    read_otainfo();//上电读取一次当前版本号信息
     bootloader_judge();
     /* USER CODE END 2 */
     /* Infinite loop */
@@ -144,7 +136,6 @@ int main(void)
             }
 
         }
-
         if(boot_startflag & UPDATA_A_FLAG)
         {
             wifi_printf("长度%d字节",OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]);
@@ -163,7 +154,9 @@ int main(void)
                 }
                 if(0 == OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber])
                 {
-                    writeota_flag(0);
+                    OTA_Info_t.ota_flag=0;
+                    write_otainfo();
+                    boot_startflag &=~ UPDATA_A_FLAG;
                 }
                 NVIC_SystemReset();
             }

@@ -120,6 +120,7 @@ int main(void)
     /* USER CODE BEGIN WHILE */
     while (1)
     {
+        HAL_Delay(2);
         /* USER CODE END WHILE */
         if(WIFI_RX_Data_t.rxdata_out != WIFI_RX_Data_t.rxdata_in)
         {

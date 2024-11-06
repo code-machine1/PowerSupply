@@ -82,15 +82,18 @@ void Error_Handler(void);
 #define STM32_B_PAGE_NUM              STM32_PAGE_NUM - STM32_A_PAGE_NUM
 #define STM32_A_START_PAGE_NUM        STM32_A_PAGE_NUM
 #define STM32_A_START_ADDR            STM32_FLASH_START_ADDR + STM32_A_START_PAGE_NUM * STM32_PAGE_SIZES
-#define STM32_VERSION_ADDR            0x0800FFE0
+#define STM32_VERSION_ADDR            0x0800FFD0
 #define OTA_UPDATA_STATUS             0x1234
 #define OTA_INFO_SIZE                 sizeof(OTA_Info)
+#define OTA_INFO_ADDR                 0x0800FFA0
 #define UPDATA_A_FLAG                 0x00000001
 #define IAP_XMODEM_FLAG               0X00000002
 #define IAP_XMODEMDATA_FLAG           0X00000004
 #define SET_VERSION_FLAG              0X00000008
 #define CMD_5_FLAG                    0X00000010
 #define CMD_5_XMODEM_FLAG             0X00000020
+#define CMD_6_FLAG                    0X00000040
+
 //VER-1.0.0-2024/11/5-11:00
 
 typedef struct

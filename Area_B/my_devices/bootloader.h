@@ -20,4 +20,6 @@ uint8_t bootloader_enter(uint8_t timeout);
 void bootloader_info(void);
 void bootloader_event(uint8_t *data,uint16_t datalen);
 uint16_t bootloader_crc16(uint8_t * data,uint16_t datalen);
+void write_otainfo(void);
+void read_otainfo(void);
 #endif

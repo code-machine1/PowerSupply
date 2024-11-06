@@ -22,18 +22,15 @@ Dialog DLL:      DCM.DLL V1.17.5.0
  
 <h2>Project:</h2>
 D:\Code(CubeMX)\STM32_OTA\Area_B\MDK-ARM\STM32_OTA.uvprojx
-Project File Date:  11/05/2024
+Project File Date:  11/06/2024
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Program Files\Keil_v5\ARM\ARMCC\Bin'
 Build target 'STM32_OTA'
-compiling bootloader.c...
-..\my_devices\bootloader.c(40): error:  #254: type name is not allowed
-      wptr = (uint8_t *)&OTA_Info;
-..\my_devices\bootloader.c(39): warning:  #550-D: variable "wptr"  was set but never used
-      uint8_t *wptr;
-..\my_devices\bootloader.c: 1 warning, 1 error
-"STM32_OTA\STM32_OTA.axf" - 1 Error(s), 1 Warning(s).
+compiling main.c...
+linking...
+Program Size: Code=18916 RO-data=7728 RW-data=28 ZI-data=6772  
+"STM32_OTA\STM32_OTA.axf" - 0 Error(s), 0 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -57,7 +54,6 @@ Package Vendor: Keil
 
    * Component: ARM::CMSIS:CORE:5.6.0
       Include file:  CMSIS/Core/Include/tz_context.h
-Target not created.
 Build Time Elapsed:  00:00:01
 </pre>
 </body>

@@ -36,15 +36,34 @@ uint32_t readota_version(uint16_t *datas)
 void write_otainfo(void)
 {
     uint8_t i;
-    uint8_t *wptr;
-     wptr = (uint8_t *)&OTA_Info;
-    for(i=0;i<OTA_INFO_SIZE;i++)
+    uint16_t *wptr;
+    wptr = (uint16_t *)&OTA_Info_t;
+    MyFLASH_ErasePage(OTA_INFO_ADDR);
+    MyFLASH_ErasePage(STM32_VERSION_ADDR);
+    for(i=0; i<OTA_INFO_SIZE; i++)
     {
-        
+        MyFLASH_ProgramHalfWord(OTA_INFO_ADDR + i * 2,*wptr);
+        wptr++;
         HAL_Delay(5);
     }
-    
+
 }
+
+void read_otainfo(void)
+{
+    uint8_t i;
+    uint16_t *wptr;
+    wptr = (uint16_t *)&OTA_Info_t;
+    for(i=0; i<OTA_INFO_SIZE; i++)
+    {
+        wptr[i]=MyFLASH_ReadHalfWord(OTA_INFO_ADDR + i * 2);
+
+        //HAL_Delay(5);
+    }
+
+}
+
+
 
 void bootloader_judge(void)
 {
@@ -123,7 +142,8 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
         else if((1 == datalen) && ('4' == data[0]))
         {
             wifi_printf("查询版本号\r\n");
-            readota_version((uint16_t *)OTA_Info_t.ota_version);
+            read_otainfo();
+            //readota_version((uint16_t *)OTA_Info_t.ota_version);
             wifi_printf("查询完成，当前版本号为：%s\r\n",OTA_Info_t.ota_version);
             bootloader_info();
         }
@@ -131,6 +151,11 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
         {
             wifi_printf("向外部flash下载程序，输入要使用的编块号（1~9）\r\n");
             boot_startflag |= CMD_5_FLAG;
+        }
+        else if((1 == datalen) && ('6' == data[0]))
+        {
+            wifi_printf("使用外部flash内的程序，输入需要使用的编号\r\n");
+            boot_startflag |= CMD_6_FLAG;
         }
         else if((1 == datalen) && ('7' == data[0]))
         {
@@ -193,7 +218,7 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
             {
                 boot_startflag &=~ CMD_5_XMODEM_FLAG;
                 OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] = UpData_Info_t.Xmodemnumber*128;
-                
+
             }
             else
             {
@@ -213,7 +238,8 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
             {
                 memset(OTA_Info_t.ota_version,0,32);
                 memcpy(OTA_Info_t.ota_version,data,26);
-                writeota_version((uint16_t *)OTA_Info_t.ota_version);
+                write_otainfo();
+                //writeota_version((uint16_t *)OTA_Info_t.ota_version);
                 wifi_printf("设置完成，当前版本号为：%s\r\n",OTA_Info_t.ota_version);
                 boot_startflag &=~ SET_VERSION_FLAG;
                 bootloader_info();
@@ -252,6 +278,28 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
             wifi_printf("数据长度错误\r\n");
         }
     }
+
+    else if(boot_startflag & CMD_6_FLAG)
+    {
+        if(1 == datalen)
+        {
+            if((data[0]>=0x31)&&(data[0])<=0x39)
+            {
+                UpData_Info_t.W25Q32_BlockNumber = (data[0]-0x30);
+                boot_startflag |= UPDATA_A_FLAG;
+
+                boot_startflag &=~ CMD_6_FLAG;
+            } else
+            {
+                wifi_printf("输入编号错误\r\n");
+            }
+        }
+        else
+        {
+            wifi_printf("数据长度错误\r\n");
+        }
+    }
+
 }
 
 __asm void MSR_SP(uint32_t addr)
