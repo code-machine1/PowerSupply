@@ -91,24 +91,13 @@ void MyFLASH_ProgramHalfWord(uint32_t Address, uint16_t Data)
 
 void stm32_eraseflash(uint16_t start,uint16_t erase_numbeer)
 {
-    uint16_t i;
-    HAL_FLASH_Unlock();                         //解锁
-    for(i=0; i<erase_numbeer; i++)
+        uint16_t i;
+        HAL_FLASH_Unlock();                         //解锁
+    for(i=0;i<erase_numbeer;i++)
     {
         MyFLASH_ErasePage((0x08000000+start*1024)+(i*1024));
     }
-    HAL_FLASH_Lock();                           //加锁
+        HAL_FLASH_Lock();                           //加锁
 
 }
 
-void stm32_writeflash(uint32_t start_addr, uint32_t *data,uint32_t write_number)
-{
-    HAL_FLASH_Unlock();                         //解锁
-    while(write_number)
-    {
-        MyFLASH_ProgramWord(start_addr,*data);
-        write_number-=4;
-        start_addr+=4;
-        data++;
-    }
-}

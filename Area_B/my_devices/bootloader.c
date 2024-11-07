@@ -10,9 +10,8 @@ void write_otainfo(void)
     uint16_t i;
     uint16_t *wptr;
     wptr = (uint16_t *)&OTA_Info_t;
-    MyFLASH_ErasePage(OTA_INFO_ADDR);
-    MyFLASH_ErasePage(STM32_VERSION_ADDR);
-    for(i=0; i<500; i++)
+    //MyFLASH_ErasePage(OTA_INFO_ADDR);
+    for(i=0; i<OTA_INFO_SIZE; i++)
     {
         MyFLASH_ProgramHalfWord(OTA_INFO_ADDR + i * 2,*wptr);
         wptr++;
@@ -26,11 +25,11 @@ void read_otainfo(void)
     uint16_t i;
     uint16_t *wptr;
     wptr = (uint16_t *)&OTA_Info_t;
-    for(i=0; i<500; i++)
+    for(i=0; i<OTA_INFO_SIZE; i++)
     {
         wptr[i]=MyFLASH_ReadHalfWord(OTA_INFO_ADDR + i * 2);
 
-        //HAL_Delay(5);
+        HAL_Delay(5);
     }
 
 }
@@ -95,12 +94,12 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
         if((1 == datalen) && ('1' == data[0]))
         {
             wifi_printf("擦除A区\r\n");
-            BSP_W25Qx_Erase_Blocks(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
+            stm32_eraseflash(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
         }
         else if((1 == datalen) && ('2' == data[0]))
         {
             wifi_printf("通过Xmodem协议，串口IAP下载程序，请使用 .bin格式文件\r\n");
-            BSP_W25Qx_Erase_Blocks(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
+            stm32_eraseflash(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
             boot_startflag |= (IAP_XMODEM_FLAG | IAP_XMODEMDATA_FLAG);
             UpData_Info_t.Xmodemtime = 0;
             UpData_Info_t.Xmodemnumber = 0;
@@ -114,7 +113,6 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
         {
             wifi_printf("查询版本号\r\n");
             read_otainfo();
-            //readota_version((uint16_t *)OTA_Info_t.ota_version);
             wifi_printf("查询完成，当前版本号为：%s\r\n",OTA_Info_t.ota_version);
             bootloader_info();
         }
@@ -152,14 +150,13 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
                     {
                         for(uint8_t i=0; i<4; i++)//写入外部flash
                         {
-                            BSP_W25Qx_Write((uint8_t *)UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4,256);
+                            BSP_W25Qx_Write_Page((uint8_t *)UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
                             //BSP_W25Qx_Page_Write(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
                         }
                     }
                     else//写入单片机A区
                     {
-                        BSP_W25Qx_Write_Blocks(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))-1) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,STM32_PAGE_SIZES);
-
+                        stm32_writeflash(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))-1) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,STM32_PAGE_SIZES);
                     }
                 }
                 wifi_printf("\x06");
@@ -178,14 +175,14 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
                 {
                     for(uint8_t i=0; i<4; i++)
                     {
-                        BSP_W25Qx_Write((uint8_t *)UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4,256);//疑点 可能写入函数有问题 报错说明数据包长度不对  2024 11-6 21-26  (验证OK)
+                        BSP_W25Qx_Write_Page((uint8_t *)UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
                         //BSP_W25Qx_Page_Write(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
 
                     }
                 }
                 else
                 {
-                    BSP_W25Qx_Write_Blocks(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,(UpData_Info_t.Xmodemnumber %(STM32_PAGE_SIZES/128))*128);
+                    stm32_writeflash(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,(UpData_Info_t.Xmodemnumber %(STM32_PAGE_SIZES/128))*128);
                 }
             }
             boot_startflag &=~ IAP_XMODEMDATA_FLAG;
@@ -215,7 +212,6 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
                 memset(OTA_Info_t.ota_version,0,32);
                 memcpy(OTA_Info_t.ota_version,data,26);
                 write_otainfo();
-                //writeota_version((uint16_t *)OTA_Info_t.ota_version);
                 wifi_printf("设置完成，当前版本号为：%s\r\n",OTA_Info_t.ota_version);
                 boot_startflag &=~ SET_VERSION_FLAG;
                 bootloader_info();
@@ -240,8 +236,8 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
                 UpData_Info_t.Xmodemtime = 0;
                 UpData_Info_t.Xmodemnumber = 0;
                 OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] = 0;
-                //BSP_W25Qx_Erase_Block64K(UpData_Info_t.W25Q32_BlockNumber);//疑点 可能函数有问题，可以换成擦除整个芯片试试  2024 11-6 21-26   (验证OK)
-                BSP_W25Qx_Erase_Chip();
+                //BSP_W25Qx_Erase_Block64K(UpData_Info_t.W25Q32_BlockNumber);
+                BSP_W25Qx_Erase_Block64K(UpData_Info_t.W25Q32_BlockNumber);
                 wifi_printf("通过Xmodem协议，向外部flash第%d个块下载程序，请使用 .bin格式文件\r\n",UpData_Info_t.W25Q32_BlockNumber);
                 boot_startflag &=~ CMD_5_FLAG;
             }

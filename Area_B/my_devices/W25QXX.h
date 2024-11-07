@@ -92,10 +92,14 @@ uint8_t BSP_W25Qx_Read(uint8_t* pData, uint32_t ReadAddr, uint32_t Size);
 uint8_t BSP_W25Qx_Write(uint8_t* pData, uint32_t WriteAddr, uint32_t Size);
 uint8_t BSP_W25Qx_Erase_Block(uint32_t Address);
 uint8_t BSP_W25Qx_Erase_Chip(void);
-void BSP_W25Qx_Erase_Blocks(uint32_t start,uint16_t num);
-uint8_t BSP_W25Qx_Erase_Block64K(uint8_t block_number);
+
 void BSP_W25Qx_Write_Blocks(uint32_t start_addr ,uint32_t *wdata,uint32_t num);
 uint8_t BSP_W25Qx_Page_Write(uint8_t* pData, uint16_t pagenumber);
+
+uint8_t BSP_W25Qx_Erase_Block64K(uint8_t block_number);
+uint8_t BSP_W25Qx_Write_Page(uint8_t *data,uint16_t page_numbere);
+uint8_t BSP_W25Qx_Read_Data(uint8_t *data,uint32_t addr,uint32_t datalen);
+
 
 #endif
 

@@ -410,12 +410,12 @@ uint8_t BSP_W25Qx_Read_Data(uint8_t *data,uint32_t addr,uint32_t datalen)
             return W25Qx_TIMEOUT;
         }
     }
-
+    
     W25Qx_Enable();
-    HAL_SPI_Transmit(&hspi2, cmd, 4, W25Qx_TIMEOUT_VALUE);
-    HAL_SPI_Receive(&hspi2, data,datalen,W25Qx_TIMEOUT_VALUE);
+        HAL_SPI_Transmit(&hspi2, cmd, 4, W25Qx_TIMEOUT_VALUE);
+            HAL_SPI_Receive(&hspi2, data,datalen,W25Qx_TIMEOUT_VALUE);
     W25Qx_Disable();
-    while(BSP_W25Qx_GetStatus() == W25Qx_BUSY)
+        while(BSP_W25Qx_GetStatus() == W25Qx_BUSY)
         ;
     {
         if((HAL_GetTick() - tickstart) > W25Q128FV_SECTOR_ERASE_MAX_TIME)

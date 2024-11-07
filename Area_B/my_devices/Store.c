@@ -47,10 +47,10 @@ void Store_Save(void)
 
 void Store_Save_OTA_VER(uint16_t *datas)
 {
-    MyFLASH_ErasePage(STM32_VERSION_ADDR);             //擦除指定页
+    MyFLASH_ErasePage(OTA_INFO_ADDR);             //擦除指定页
     for (uint16_t i = 0; i < STORE_COUNT; i ++)         //循环STORE_COUNT次，包括第一个标志位
     {
-        MyFLASH_ProgramHalfWord(STM32_VERSION_ADDR + i * 2, datas[i]);    //将SRAM数组的数据备份保存到闪存
+        MyFLASH_ProgramHalfWord(OTA_INFO_ADDR + i * 2, datas[i]);    //将SRAM数组的数据备份保存到闪存
     }
 }
 
@@ -69,3 +69,10 @@ void Store_Clear(void)
     }
     Store_Save();                                       //保存数据到闪存
 }
+
+
+
+
+
+
+

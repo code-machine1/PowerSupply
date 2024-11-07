@@ -10,5 +10,6 @@ uint8_t MyFLASH_ReadByte(uint32_t Address);
 void MyFLASH_ErasePage(uint32_t PageAddress);
 void MyFLASH_ProgramWord(uint32_t Address, uint32_t Data);
 void MyFLASH_ProgramHalfWord(uint32_t Address, uint16_t Data);
-
+void stm32_eraseflash(uint16_t start,uint16_t erase_numbeer);
+void stm32_writeflash(uint32_t start_addr, uint32_t *data,uint32_t write_number);
 #endif

@@ -605,16 +605,16 @@ void LCD_ShowFlashGB2312(uint16_t x,uint16_t y,uint8_t *s,uint16_t fc,uint16_t b
     switch(sizey)
     {
     case 12:
-        BSP_W25Qx_Read(GB2312,GB2312_12X12 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(GB2312,GB2312_12X12 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
         break;
     case 16:
-        BSP_W25Qx_Read(GB2312,GB2312_16X16 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(GB2312,GB2312_16X16 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
         break;
     case 24:
-        BSP_W25Qx_Read(GB2312,GB2312_24X24 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(GB2312,GB2312_24X24 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
         break;
     case 32:
-        BSP_W25Qx_Read(GB2312,GB2312_32X32 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(GB2312,GB2312_32X32 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
         break;
     }
 
@@ -666,16 +666,16 @@ void LCD_ShowFlashChar(uint16_t x,uint16_t y,uint8_t num,uint16_t fc,uint16_t bc
     switch(sizey)
     {
     case 12:
-        BSP_W25Qx_Read(ACSII,Acsii_1206 + ((num-32))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(ACSII,Acsii_1206 + ((num-32))*TypefaceNum, TypefaceNum);
         break;
     case 16:
-        BSP_W25Qx_Read(ACSII,Acsii_1608 + ((num-32))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(ACSII,Acsii_1608 + ((num-32))*TypefaceNum, TypefaceNum);
         break;
     case 24:
-        BSP_W25Qx_Read(ACSII,Acsii_2412 + ((num-32))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(ACSII,Acsii_2412 + ((num-32))*TypefaceNum, TypefaceNum);
         break;
     case 32:
-        BSP_W25Qx_Read(ACSII,Acsii_3212 + ((num-32))*TypefaceNum, TypefaceNum);
+        BSP_W25Qx_Read_Data(ACSII,Acsii_3212 + ((num-32))*TypefaceNum, TypefaceNum);
         break;
     }
 
