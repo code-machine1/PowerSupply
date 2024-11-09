@@ -593,122 +593,123 @@ void LCD_ShowFlashString(uint16_t x,uint16_t y,char *str,uint16_t fc,uint16_t bc
 
 void LCD_ShowFlashGB2312(uint16_t x,uint16_t y,uint8_t *s,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode)
 {
-    uint8_t i,j,m=0;
-    uint16_t TypefaceNum;//一个字符所占字节大小
-    uint16_t x0=x;
-    TypefaceNum=(sizey/8+((sizey%8)?1:0))*sizey;
+//    uint8_t i,j,m=0;
+//    uint16_t TypefaceNum;//一个字符所占字节大小
+//    uint16_t x0=x;
+//    TypefaceNum=(sizey/8+((sizey%8)?1:0))*sizey;
 
-    unsigned char GB2312[TypefaceNum];
-    memset(GB2312,0,TypefaceNum);
-    unsigned char c = 0;
+//    unsigned char GB2312[TypefaceNum];
+//    memset(GB2312,0,TypefaceNum);
+//    unsigned char c = 0;
 
-    switch(sizey)
-    {
-    case 12:
-        BSP_W25Qx_Read_Data(GB2312,GB2312_12X12 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
-        break;
-    case 16:
-        BSP_W25Qx_Read_Data(GB2312,GB2312_16X16 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
-        break;
-    case 24:
-        BSP_W25Qx_Read_Data(GB2312,GB2312_24X24 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
-        break;
-    case 32:
-        BSP_W25Qx_Read_Data(GB2312,GB2312_32X32 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
-        break;
-    }
+//    switch(sizey)
+//    {
+//    case 12:
+//        BSP_W25Qx_Read_Data(GB2312,GB2312_12X12 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+//        break;
+//    case 16:
+//        BSP_W25Qx_Read_Data(GB2312,GB2312_16X16 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+//        break;
+//    case 24:
+//        BSP_W25Qx_Read_Data(GB2312,GB2312_24X24 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+//        break;
+//    case 32:
+//        BSP_W25Qx_Read_Data(GB2312,GB2312_32X32 + ((*s-0xA1)*94+(*(s+1)-0xA1))*TypefaceNum, TypefaceNum);
+//        break;
+//    }
 
-    LCD_Address_Set(x,y,x+sizey-1,y+sizey-1);
-    for(i=0; i<TypefaceNum; i++)
-    {
-        c = GB2312[i];
-        for(j=0; j<8; j++)
-        {
-            if(!mode)//非叠加方式
-            {
-                if(c&(0x01<<j))LCD_WR_DATA(fc);
-                else LCD_WR_DATA(bc);
-                m++;
-                if(m%sizey==0)
-                {
-                    m=0;
-                    break;
-                }
-            }
-            else//叠加方式
-            {
-                if(c&(0x01<<j)) LCD_DrawPoint(x,y,fc);//画一个点
-                x++;
-                if((x-x0)==sizey)
-                {
-                    x=x0;
-                    y++;
-                    break;
-                }
-            }
-        }
-    }
-
-
+//    LCD_Address_Set(x,y,x+sizey-1,y+sizey-1);
+//    for(i=0; i<TypefaceNum; i++)
+//    {
+//        c = GB2312[i];
+//        for(j=0; j<8; j++)
+//        {
+//            if(!mode)//非叠加方式
+//            {
+//                if(c&(0x01<<j))LCD_WR_DATA(fc);
+//                else LCD_WR_DATA(bc);
+//                m++;
+//                if(m%sizey==0)
+//                {
+//                    m=0;
+//                    break;
+//                }
+//            }
+//            else//叠加方式
+//            {
+//                if(c&(0x01<<j)) LCD_DrawPoint(x,y,fc);//画一个点
+//                x++;
+//                if((x-x0)==sizey)
+//                {
+//                    x=x0;
+//                    y++;
+//                    break;
+//                }
+//            }
+//        }
+//    }
 }
+
+
+
 
 void LCD_ShowFlashChar(uint16_t x,uint16_t y,uint8_t num,uint16_t fc,uint16_t bc,uint8_t sizey,uint8_t mode)
 {
-    uint8_t temp,sizex,t,m=0;
+//    uint8_t temp,sizex,t,m=0;
 
-    uint16_t i,TypefaceNum;//一个字符所占字节大小
-    uint16_t x0=x;
-    sizex=sizey/2;
-    TypefaceNum=(sizex/8+((sizex%8)?1:0))*sizey;
-    uint8_t ACSII[TypefaceNum];
-    memset(ACSII,0,TypefaceNum);
+//    uint16_t i,TypefaceNum;//一个字符所占字节大小
+//    uint16_t x0=x;
+//    sizex=sizey/2;
+//    TypefaceNum=(sizex/8+((sizex%8)?1:0))*sizey;
+//    uint8_t ACSII[TypefaceNum];
+//    memset(ACSII,0,TypefaceNum);
 
-    switch(sizey)
-    {
-    case 12:
-        BSP_W25Qx_Read_Data(ACSII,Acsii_1206 + ((num-32))*TypefaceNum, TypefaceNum);
-        break;
-    case 16:
-        BSP_W25Qx_Read_Data(ACSII,Acsii_1608 + ((num-32))*TypefaceNum, TypefaceNum);
-        break;
-    case 24:
-        BSP_W25Qx_Read_Data(ACSII,Acsii_2412 + ((num-32))*TypefaceNum, TypefaceNum);
-        break;
-    case 32:
-        BSP_W25Qx_Read_Data(ACSII,Acsii_3212 + ((num-32))*TypefaceNum, TypefaceNum);
-        break;
-    }
+//    switch(sizey)
+//    {
+//    case 12:
+//        BSP_W25Qx_Read_Data(ACSII,Acsii_1206 + ((num-32))*TypefaceNum, TypefaceNum);
+//        break;
+//    case 16:
+//        BSP_W25Qx_Read_Data(ACSII,Acsii_1608 + ((num-32))*TypefaceNum, TypefaceNum);
+//        break;
+//    case 24:
+//        BSP_W25Qx_Read_Data(ACSII,Acsii_2412 + ((num-32))*TypefaceNum, TypefaceNum);
+//        break;
+//    case 32:
+//        BSP_W25Qx_Read_Data(ACSII,Acsii_3212 + ((num-32))*TypefaceNum, TypefaceNum);
+//        break;
+//    }
 
-
-
-    LCD_Address_Set(x,y,x+sizex-1,y+sizey-1);  //设置光标位置
-    for(i=0; i<TypefaceNum; i++)
-    {
-        temp=ACSII[i];
-        for(t=0; t<8; t++)
-        {
-            if(!mode)//非叠加模式
-            {
-                if(temp&(0x01<<t))LCD_WR_DATA(fc);
-                else LCD_WR_DATA(bc);
-                m++;
-                if(m%sizex==0)
-                {
-                    m=0;
-                    break;
-                }
-            }
-            else//叠加模式
-            {
-                if(temp&(0x01<<t))LCD_DrawPoint(x,y,fc);//画一个点
-                x++;
-                if((x-x0)==sizex)
-                {
-                    x=x0;
-                    y++;
-                    break;
-                }
-            }
-        }
-    }
 }
+
+//    LCD_Address_Set(x,y,x+sizex-1,y+sizey-1);  //设置光标位置
+//    for(i=0; i<TypefaceNum; i++)
+//    {
+//        temp=ACSII[i];
+//        for(t=0; t<8; t++)
+//        {
+//            if(!mode)//非叠加模式
+//            {
+//                if(temp&(0x01<<t))LCD_WR_DATA(fc);
+//                else LCD_WR_DATA(bc);
+//                m++;
+//                if(m%sizex==0)
+//                {
+//                    m=0;
+//                    break;
+//                }
+//            }
+//            else//叠加模式
+//            {
+//                if(temp&(0x01<<t))LCD_DrawPoint(x,y,fc);//画一个点
+//                x++;
+//                if((x-x0)==sizex)
+//                {
+//                    x=x0;
+//                    y++;
+//                    break;
+//                }
+//            }
+//        }
+//    }
+//}

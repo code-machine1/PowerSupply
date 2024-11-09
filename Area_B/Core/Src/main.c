@@ -55,9 +55,7 @@
 
 uint8_t wData[0x100];   //写缓存数组
 uint8_t rData[0x100];   //读缓存数组
-uint8_t ID[4];          //设备ID缓存数组
-uint32_t i;
-
+uint16_t i,j;
 
 
 OTA_Info OTA_Info_t;
@@ -120,12 +118,9 @@ int main(void)
     LCD_ShowString(40,0,(uint8_t *)"B side",RED,WHITE,16,0);
     HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_RESET);
     HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_SET);
-    
-    
-    
-    
     bootloader_judge();
     /* USER CODE END 2 */
+
     /* Infinite loop */
     /* USER CODE BEGIN WHILE */
     while (1)
@@ -141,6 +136,18 @@ int main(void)
             }
 
         }
+
+        if(boot_startflag & IAP_XMODEM_FLAG)
+        {
+            if(UpData_Info_t.Xmodemtime>=100)
+            {
+                wifi_printf("C");
+                UpData_Info_t.Xmodemtime = 0;
+            }
+            UpData_Info_t.Xmodemtime++;
+        }
+
+
         if(boot_startflag & UPDATA_A_FLAG)
         {
             wifi_printf("长度%d字节\r\n",OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]);
@@ -173,15 +180,7 @@ int main(void)
             }
 
         }
-        else if(boot_startflag & IAP_XMODEM_FLAG)
-        {
-            if(UpData_Info_t.Xmodemtime>=100)
-            {
-                wifi_printf("C");
-                UpData_Info_t.Xmodemtime = 0;
-            }
-            UpData_Info_t.Xmodemtime++;
-        }
+
 
         /* USER CODE END WHILE */
 
@@ -264,23 +263,3 @@ void assert_failed(uint8_t *file, uint32_t line)
     /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
-
-
-
-//        if(WIFI_RX_Data_t.rxdata_out != WIFI_RX_Data_t.rxdata_in)
-//        {
-//            wifi_printf("本次收到了%d字节数据\r\n",WIFI_RX_Data_t.rxdata_out->end -WIFI_RX_Data_t.rxdata_out->start+1);
-//            for(uint8_t i=0; i<WIFI_RX_Data_t.rxdata_out->end -WIFI_RX_Data_t.rxdata_out->start+1; i++)
-//            {
-//                wifi_printf("%c",WIFI_RX_Data_t.rxdata_out->start[i]);
-//            }
-//            wifi_printf("\r\n");
-//            WIFI_RX_Data_t.rxdata_out++;
-//            if(WIFI_RX_Data_t.rxdata_out == WIFI_RX_Data_t.rxdata_end)
-//            {
-//                WIFI_RX_Data_t.rxdata_out = &WIFI_RX_Data_t.rxdata_block[0];
-//            }
-
-//        }
-
-//only for debug

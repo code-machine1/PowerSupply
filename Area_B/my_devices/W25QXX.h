@@ -1,11 +1,55 @@
-#ifndef __W25Qxx_H
-#define __W25Qxx_H
+/*********************************************************************************************************
+*
+* File                : W25Qx.h
+* Hardware Environment:
+* Build Environment   : RealView MDK-ARM  Version: 5.15
+* Version             : V1.0
+* By                  :
+*
+*                                  (c) Copyright 2005-2015, WaveShare
+*                                       http://www.waveshare.net
+*                                          All Rights Reserved
+*
+*********************************************************************************************************/
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __W25QXX_H
+#define __W25QXX_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
-#include "stm32f1xx.h"
+#include "stm32f1xx_hal.h"
 #include "spi.h"
-#include "myflash.h"
+
+/** @addtogroup BSP
+  * @{
+  */
+
+/** @addtogroup Components
+  * @{
+  */
+
+/** @addtogroup W25Q128FV
+  * @{
+  */
+
+/** @defgroup W25Q128FV_Exported_Types
+  * @{
+  */
+
+/**
+  * @}
+  */
+
+/** @defgroup W25Q128FV_Exported_Constants
+  * @{
+  */
+
+/**
+  * @brief  W25Q128FV Configuration
+  */
 #define W25Q128FV_FLASH_SIZE                  0x1000000 /* 128 MBits => 16MBytes */
 #define W25Q128FV_SECTOR_SIZE                 0x10000   /* 256 sectors of 64KBytes */
 #define W25Q128FV_SUBSECTOR_SIZE              0x1000    /* 4096 subsectors of 4kBytes */
@@ -19,6 +63,9 @@
 #define W25Q128FV_SUBSECTOR_ERASE_MAX_TIME    800
 #define W25Qx_TIMEOUT_VALUE 1000
 
+/**
+  * @brief  W25Q128FV Commands
+  */
 /* Reset Operations */
 #define RESET_ENABLE_CMD                     0x66
 #define RESET_MEMORY_CMD                     0x99
@@ -60,7 +107,7 @@
 
 
 /* Erase Operations */
-#define ERASE_BLOCK_CMD                      0xD8
+#define SECTOR_ERASE_64K_CMD                 0xD8
 #define SECTOR_ERASE_CMD                     0x20
 #define CHIP_ERASE_CMD                       0xC7
 
@@ -74,13 +121,13 @@
 #define W25Q128FV_FSR_QE                      ((uint8_t)0x02)    /*!< quad enable */
 
 
-#define W25Qx_Enable()          HAL_GPIO_WritePin(SPI2_CS_GPIO_Port,SPI2_CS_Pin,GPIO_PIN_RESET)
-#define W25Qx_Disable()         HAL_GPIO_WritePin(SPI2_CS_GPIO_Port,SPI2_CS_Pin,GPIO_PIN_SET)
+#define W25Qx_Enable()          HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_RESET)
+#define W25Qx_Disable()         HAL_GPIO_WritePin(SPI2_CS_GPIO_Port, SPI2_CS_Pin, GPIO_PIN_SET)
 
 #define W25Qx_OK            ((uint8_t)0x00)
 #define W25Qx_ERROR         ((uint8_t)0x01)
 #define W25Qx_BUSY          ((uint8_t)0x02)
-#define W25Qx_TIMEOUT       ((uint8_t)0x03)
+#define W25Qx_TIMEOUT               ((uint8_t)0x03)
 
 
 uint8_t BSP_W25Qx_Init(void);
@@ -93,13 +140,36 @@ uint8_t BSP_W25Qx_Write(uint8_t* pData, uint32_t WriteAddr, uint32_t Size);
 uint8_t BSP_W25Qx_Erase_Block(uint32_t Address);
 uint8_t BSP_W25Qx_Erase_Chip(void);
 
-void BSP_W25Qx_Write_Blocks(uint32_t start_addr ,uint32_t *wdata,uint32_t num);
-uint8_t BSP_W25Qx_Page_Write(uint8_t* pData, uint16_t pagenumber);
 
 uint8_t BSP_W25Qx_Erase_Block64K(uint8_t block_number);
 uint8_t BSP_W25Qx_Write_Page(uint8_t *data,uint16_t page_numbere);
 uint8_t BSP_W25Qx_Read_Data(uint8_t *data,uint32_t addr,uint32_t datalen);
+/**
+  * @}
+  */
 
+/** @defgroup W25Q128FV_Exported_Functions
+  * @{
+  */
+/**
+  * @}
+  */
 
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __W25Qx_H */
 

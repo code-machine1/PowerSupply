@@ -10,12 +10,10 @@ void write_otainfo(void)
     uint16_t i;
     uint16_t *wptr;
     wptr = (uint16_t *)&OTA_Info_t;
-    //MyFLASH_ErasePage(OTA_INFO_ADDR);
     for(i=0; i<OTA_INFO_SIZE; i++)
     {
         MyFLASH_ProgramHalfWord(OTA_INFO_ADDR + i * 2,*wptr);
         wptr++;
-        HAL_Delay(5);
     }
 
 }
@@ -28,8 +26,6 @@ void read_otainfo(void)
     for(i=0; i<OTA_INFO_SIZE; i++)
     {
         wptr[i]=MyFLASH_ReadHalfWord(OTA_INFO_ADDR + i * 2);
-
-        HAL_Delay(5);
     }
 
 }
@@ -56,7 +52,6 @@ void bootloader_judge(void)
     }
     wifi_printf("进入bootloader命令行\r\n");
     bootloader_info();
-
 
 }
 
@@ -88,6 +83,7 @@ void bootloader_info(void)
 
 void bootloader_event(uint8_t *data,uint16_t datalen)
 {
+    uint8_t i;
     int temp;
     if(0 == boot_startflag)
     {
@@ -148,10 +144,9 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
                 {
                     if(boot_startflag & CMD_5_XMODEM_FLAG)//判断是不是命令5
                     {
-                        for(uint8_t i=0; i<4; i++)//写入外部flash
+                        for(i=0; i<4; i++)//写入外部flash
                         {
-                            BSP_W25Qx_Write_Page((uint8_t *)UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
-                            //BSP_W25Qx_Page_Write(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
+                            BSP_W25Qx_Write_Page(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
                         }
                     }
                     else//写入单片机A区
@@ -173,11 +168,9 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
             {
                 if(boot_startflag & CMD_5_XMODEM_FLAG)
                 {
-                    for(uint8_t i=0; i<4; i++)
+                    for(i=0; i<4; i++)
                     {
-                        BSP_W25Qx_Write_Page((uint8_t *)UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
-                        //BSP_W25Qx_Page_Write(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
-
+                        BSP_W25Qx_Write_Page(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
                     }
                 }
                 else
@@ -236,7 +229,6 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
                 UpData_Info_t.Xmodemtime = 0;
                 UpData_Info_t.Xmodemnumber = 0;
                 OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] = 0;
-                //BSP_W25Qx_Erase_Block64K(UpData_Info_t.W25Q32_BlockNumber);
                 BSP_W25Qx_Erase_Block64K(UpData_Info_t.W25Q32_BlockNumber);
                 wifi_printf("通过Xmodem协议，向外部flash第%d个块下载程序，请使用 .bin格式文件\r\n",UpData_Info_t.W25Q32_BlockNumber);
                 boot_startflag &=~ CMD_5_FLAG;
@@ -246,7 +238,6 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
                 wifi_printf("输入编号错误\r\n");
             }
         }
-
         else
         {
             wifi_printf("数据长度错误\r\n");
@@ -305,8 +296,8 @@ void bootloader_clear(void)
     HAL_GPIO_DeInit(GPIOD,GPIO_PIN_All);
     HAL_UART_DeInit(&huart1);
     HAL_UART_DeInit(&huart2);
-    HAL_SPI_DeInit(&hspi2);
-    HAL_DMA_DeInit(&hdma_usart2_rx);
+    HAL_SPI_DeInit (&hspi2);
+    HAL_DMA_DeInit (&hdma_usart2_rx);
 }
 
 /* only for xmoden crc*/
