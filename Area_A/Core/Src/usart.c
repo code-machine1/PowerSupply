@@ -23,7 +23,6 @@
 /* USER CODE BEGIN 0 */
 #include "stdio.h"
 
-//uint8_t wifi_rxbuff[WIFI_RX_SIZE];
 RX_DataInfo_t WIFI_RX_Data_t;
 
 int fputc(int ch,FILE *f)

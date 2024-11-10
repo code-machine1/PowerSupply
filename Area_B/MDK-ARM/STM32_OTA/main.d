@@ -35,9 +35,6 @@ stm32_ota\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdarg.h
 stm32_ota\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 stm32_ota\main.o: ../Core/Inc/gpio.h
 stm32_ota\main.o: ../my_devices/w25qxx.h
-stm32_ota\main.o: ../my_devices/lcd_init.h
-stm32_ota\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
-stm32_ota\main.o: ../my_devices/lcd.h
 stm32_ota\main.o: ../my_devices/bootloader.h
 stm32_ota\main.o: ../my_devices/myflash.h
 stm32_ota\main.o: ../my_devices/store.h

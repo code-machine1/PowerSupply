@@ -35,18 +35,18 @@ void read_otainfo(void)
 void bootloader_judge(void)
 {
     read_otainfo();//上电读取一次当前版本号信息
-    if(0 == bootloader_enter(200))
+    if(0 == bootloader_enter(200))//判断是否进入boot loader命令行
     {
-        if(OTA_UPDATA_STATUS == OTA_Info_t.ota_flag)
+        if(OTA_UPDATA_STATUS == OTA_Info_t.ota_flag)//这个标志位目前没有设置，后续会用到网络升级的方式中在A区做检测。
         {
             wifi_printf("OTA更新\r\n");
-            boot_startflag |= UPDATA_A_FLAG;
+            boot_startflag |= UPDATA_A_FLAG;//A区升级标志位，具体实现写到main函数里面了  懒得挪了
             UpData_Info_t.W25Q32_BlockNumber = 0;
         }
         else
         {
             wifi_printf("跳转系统分区（A区）\r\n");
-            lOAD_A(STM32_A_START_ADDR);
+            lOAD_A(STM32_A_START_ADDR);   //跳转到A区
         }
 
     }
@@ -55,7 +55,7 @@ void bootloader_judge(void)
 
 }
 
-uint8_t bootloader_enter(uint8_t timeout)
+uint8_t bootloader_enter(uint8_t timeout)//做进入boot loader的检测
 {
     wifi_printf("%d秒内输入小写 w 进入bootloader\r\n",timeout/100);
     while(timeout--)
@@ -69,7 +69,7 @@ uint8_t bootloader_enter(uint8_t timeout)
     return 0;
 }
 
-void bootloader_info(void)
+void bootloader_info(void) //显示操作命令行
 {
     wifi_printf("\r\n");
     wifi_printf("【1】擦除A区\r\n");
@@ -81,24 +81,25 @@ void bootloader_info(void)
     wifi_printf("【7】重启\r\n");
 }
 
-void bootloader_event(uint8_t *data,uint16_t datalen)
+void bootloader_event(uint8_t *data,uint16_t datalen)  //对接收到的命令进行处理
 {
-    uint8_t i;
-    int temp;
-    if(0 == boot_startflag)
+    uint8_t i;//for循环变量
+    int temp; //临时变量 无特殊意义
+    /* 这个if里面主要是对收到的命令进行判断，然后置位相对应的标志位 */
+    if(0 == boot_startflag)//
     {
-        if((1 == datalen) && ('1' == data[0]))
+        if((1 == datalen) && ('1' == data[0])) //命令1
         {
             wifi_printf("擦除A区\r\n");
-            stm32_eraseflash(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
+            stm32_eraseflash(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);  //擦除A区
         }
-        else if((1 == datalen) && ('2' == data[0]))
+        else if((1 == datalen) && ('2' == data[0])) //命令2 
         {
             wifi_printf("通过Xmodem协议，串口IAP下载程序，请使用 .bin格式文件\r\n");
-            stm32_eraseflash(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM);
-            boot_startflag |= (IAP_XMODEM_FLAG | IAP_XMODEMDATA_FLAG);
-            UpData_Info_t.Xmodemtime = 0;
-            UpData_Info_t.Xmodemnumber = 0;
+            stm32_eraseflash(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM); //擦除A区
+            boot_startflag |= (IAP_XMODEM_FLAG | IAP_XMODEMDATA_FLAG); //置位Xmodem标志位
+            UpData_Info_t.Xmodemtime = 0;    //清空待会儿下载要用到的数据
+            UpData_Info_t.Xmodemnumber = 0;  //清空待会儿下载要用到的数据
         }
         else if((1 == datalen) && ('3' == data[0]))
         {
@@ -130,84 +131,86 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
         }
 
     }
+    /* 前面置位完标志位后接下来就都是执行的代码 */
     else if(boot_startflag&IAP_XMODEMDATA_FLAG)  //启动XMODEM协议从串口下载数据
     {
-        if((133 == datalen) && (0x01 == data[0]))
+        if((133 == datalen) && (0x01 == data[0]))//Xmodem协议一次是发133个字节进来 具体要去看协议
         {
             boot_startflag &=~ IAP_XMODEM_FLAG;
-            UpData_Info_t.Xmodemnumcrc = bootloader_crc16(&data[3],128);
-            if(UpData_Info_t.Xmodemnumcrc == data[131]*256+data[132])
+            UpData_Info_t.Xmodemnumcrc = bootloader_crc16(&data[3],128);//这133里面前三个和后三个我们用不到，是协议里面的东西，所以校验后面的128个就可以了 具体要去看协议
+            if(UpData_Info_t.Xmodemnumcrc == data[131]*256+data[132])//如果校验成功
             {
                 UpData_Info_t.Xmodemnumber++;
                 memcpy(&UpData_Info_t.Updatabuff[((UpData_Info_t.Xmodemnumber-1)%(STM32_PAGE_SIZES/128))*128],&data[3],128);
                 if(0 == (UpData_Info_t.Xmodemnumber %(STM32_PAGE_SIZES/128)))//数据接收完1k之后
                 {
-                    if(boot_startflag & CMD_5_XMODEM_FLAG)//判断是不是命令5
+                    if(boot_startflag & CMD_5_XMODEM_FLAG)//判断是不是命令5（命令5和命令2的区别就在于收到串口发来的程序包后是直接写进A区还是存到外部flash中）
                     {
-                        for(i=0; i<4; i++)//写入外部flash
+                        for(i=0; i<4; i++)//写入外部flash  （4*256=1024）按照1k的量来写入
                         {
-                            BSP_W25Qx_Write_Page(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
+                            BSP_W25Qx_Write_Page(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8-1)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);//写入数据的偏移量和地址的偏移量
                         }
                     }
-                    else//写入单片机A区
+                    else//写入单片机A区，也是按照1K的大小写入
                     {
-                        stm32_writeflash(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))-1) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,STM32_PAGE_SIZES);
+                        stm32_writeflash(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))-1) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,STM32_PAGE_SIZES);//写入数据的偏移量和地址的偏移量
                     }
                 }
-                wifi_printf("\x06");
+                wifi_printf("\x06");//这部分是Xmodem的协议要求  具体要去看协议
             }
             else
             {
-                wifi_printf("\x15");
+                wifi_printf("\x15");//这部分是Xmodem的协议要求  具体要去看协议
             }
         }
-        if((1 == datalen) && (0x04 == data[0]))
+        if((1 == datalen) && (0x04 == data[0]))//后面是收尾的数据，因为不可能程序都是固定大小的 ，所以不能按照1k的量写入了
         {
-            wifi_printf("\x06");
+            wifi_printf("\x06");//这部分是Xmodem的协议要求  具体要去看协议
             if(0 != (UpData_Info_t.Xmodemnumber %(STM32_PAGE_SIZES/128)))
             {
-                if(boot_startflag & CMD_5_XMODEM_FLAG)
+                if(boot_startflag & CMD_5_XMODEM_FLAG)//判断是不是命令5（命令5和命令2的区别就在于收到串口发来的程序包后是直接写进A区还是存到外部flash中）
                 {
                     for(i=0; i<4; i++)
                     {
-                        BSP_W25Qx_Write_Page(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);
+                        BSP_W25Qx_Write_Page(&UpData_Info_t.Updatabuff[i*256],(UpData_Info_t.Xmodemnumber/8)*4+i+UpData_Info_t.W25Q32_BlockNumber*64*4);//不需要对页数进行偏移了 直接进外部flash里
                     }
                 }
                 else
                 {
-                    stm32_writeflash(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,(UpData_Info_t.Xmodemnumber %(STM32_PAGE_SIZES/128))*128);
+                    stm32_writeflash(STM32_A_START_ADDR + ((UpData_Info_t.Xmodemnumber/(STM32_PAGE_SIZES/128))) * STM32_PAGE_SIZES,(uint32_t *)UpData_Info_t.Updatabuff,(UpData_Info_t.Xmodemnumber %(STM32_PAGE_SIZES/128))*128);//不需要对页数进行偏移了 直接到单片机里
                 }
             }
-            boot_startflag &=~ IAP_XMODEMDATA_FLAG;
-            if(boot_startflag & CMD_5_XMODEM_FLAG)
+            boot_startflag &=~ IAP_XMODEMDATA_FLAG;//清理标志位
+            
+            if(boot_startflag & CMD_5_XMODEM_FLAG)//判断是命令5还是命令2，命令5不需要重启，但是需要保存数据到内部flash
             {
                 boot_startflag &=~ CMD_5_XMODEM_FLAG;
-                OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] = UpData_Info_t.Xmodemnumber*128;
-                write_otainfo();
-                HAL_Delay(100);
-                bootloader_info();
+                OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] = UpData_Info_t.Xmodemnumber*128;//记录当前程序的大小
+                write_otainfo();  //保存到内部的flash
+                HAL_Delay(100);   //等待一下保存完成 可有可无
+                bootloader_info();//重新进入命令行
             }
-            else
+            else//命令2就重启
             {
-                HAL_Delay(100);
-                NVIC_SystemReset();
+                HAL_Delay(100);      //延时一下 可有可无
+                NVIC_SystemReset();  //重启
             }
 
         }
 
     }
-    else if(boot_startflag & SET_VERSION_FLAG)
+    else if(boot_startflag & SET_VERSION_FLAG)  //设置版本号命令处理
     {
-        if(26 == datalen)
+        if(26 == datalen)//版本号长度限制
         {
-            if((sscanf((char *)data,"VER-%d.%d.%d-%d/%d/%d-%d:%d",&temp,&temp,&temp,&temp,&temp,&temp,&temp,&temp)==8))
+            if((sscanf((char *)data,"VER-%d.%d.%d-%d/%d/%d-%d:%d",&temp,&temp,&temp,&temp,&temp,&temp,&temp,&temp)==8))//版本号格式限制
             {
-                memset(OTA_Info_t.ota_version,0,32);
-                memcpy(OTA_Info_t.ota_version,data,26);
-                write_otainfo();
-                wifi_printf("设置完成，当前版本号为：%s\r\n",OTA_Info_t.ota_version);
-                boot_startflag &=~ SET_VERSION_FLAG;
-                bootloader_info();
+                memset(OTA_Info_t.ota_version,0,32);     //先清空版本号存放的
+                memcpy(OTA_Info_t.ota_version,data,26);  //把版本号写入到结构体
+                write_otainfo();//写入到单片机内部flash中
+                wifi_printf("设置完成，当前版本号为：%s\r\n",OTA_Info_t.ota_version);//打印信息
+                boot_startflag &=~ SET_VERSION_FLAG;//清空标志位
+                bootloader_info();//显示boot loader 命令行
             }
             else
                 wifi_printf("设置版本号格式错误\r\n");
@@ -218,20 +221,20 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
         }
 
     }
-    else if(boot_startflag & CMD_5_FLAG)
+    else if(boot_startflag & CMD_5_FLAG)//命令5处理
     {
         if(1 == datalen)
         {
-            if((data[0]>=0x31)&&(data[0])<=0x39)
+            if((data[0]>=0x31)&&(data[0])<=0x39)//检测输入的块编号范围 （字符转十六进制）
             {
-                UpData_Info_t.W25Q32_BlockNumber = data[0] - 0x30;
-                boot_startflag |= (IAP_XMODEM_FLAG | IAP_XMODEMDATA_FLAG | CMD_5_XMODEM_FLAG);
-                UpData_Info_t.Xmodemtime = 0;
-                UpData_Info_t.Xmodemnumber = 0;
-                OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] = 0;
-                BSP_W25Qx_Erase_Block64K(UpData_Info_t.W25Q32_BlockNumber);
-                wifi_printf("通过Xmodem协议，向外部flash第%d个块下载程序，请使用 .bin格式文件\r\n",UpData_Info_t.W25Q32_BlockNumber);
-                boot_startflag &=~ CMD_5_FLAG;
+                UpData_Info_t.W25Q32_BlockNumber = data[0] - 0x30;  //块编号设置（字符转十六进制）
+                boot_startflag |= (IAP_XMODEM_FLAG | IAP_XMODEMDATA_FLAG | CMD_5_XMODEM_FLAG);//置位标志位，和串口升级的区别多了CMD_5_XMODEM_FLAG，用来后面判断
+                UpData_Info_t.Xmodemtime = 0;//清空待会儿下载要用到的数据
+                UpData_Info_t.Xmodemnumber = 0;//清空待会儿下载要用到的数据
+                OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] = 0;//清空ota保存的程序大小信息
+                BSP_W25Qx_Erase_Block64K(UpData_Info_t.W25Q32_BlockNumber);//擦除外部flas中对应的块
+                wifi_printf("通过Xmodem协议，向外部flash第%d个块下载程序，请使用 .bin格式文件\r\n",UpData_Info_t.W25Q32_BlockNumber);//打印一些信息
+                boot_startflag &=~ CMD_5_FLAG;//命令5标志位清零
             }
             else
             {
@@ -244,15 +247,15 @@ void bootloader_event(uint8_t *data,uint16_t datalen)
         }
     }
 
-    else if(boot_startflag & CMD_6_FLAG)
+    else if(boot_startflag & CMD_6_FLAG)//命令6处理
     {
         if(1 == datalen)
         {
-            if((data[0]>=0x31)&&(data[0])<=0x39)
+            if((data[0]>=0x31)&&(data[0])<=0x39)//检测输入的块编号范围 （字符转十六进制）
             {
-                UpData_Info_t.W25Q32_BlockNumber = data[0]-0x30;
-                boot_startflag |= UPDATA_A_FLAG;
-                boot_startflag &=~ CMD_6_FLAG;
+                UpData_Info_t.W25Q32_BlockNumber = data[0]-0x30;//块编号设置（字符转十六进制）
+                boot_startflag |= UPDATA_A_FLAG;//A区升级标志位，具体实现写到main函数里面了  懒得挪了
+                boot_startflag &=~ CMD_6_FLAG;  //命令6标志位清零
             } else
             {
                 wifi_printf("输入编号错误\r\n");

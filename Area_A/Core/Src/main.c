@@ -27,12 +27,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <stdint.h>
-#include "w25qxx.h"
-#include "lcd_init.h"
-#include "lcd.h"
-#include "bootloader.h"
-#include "myflash.h"
-#include "store.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -53,10 +48,6 @@
 
 /* USER CODE BEGIN PV */
 
-uint8_t wData[0x100];   //写缓存数组
-uint8_t rData[0x100];   //读缓存数组
-uint8_t ID[4];          //设备ID缓存数组
-uint32_t i;
 
 OTA_Info OTA_Info_t;
 

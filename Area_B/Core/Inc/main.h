@@ -75,41 +75,41 @@ void Error_Handler(void);
 #define TFT_CS_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define STM32_FLASH_START_ADDR        0x08000000
-#define STM32_PAGE_SIZES              1024
-#define STM32_PAGE_NUM                64
-#define STM32_A_PAGE_NUM              36
-#define STM32_B_PAGE_NUM              STM32_PAGE_NUM - STM32_A_PAGE_NUM
-#define STM32_A_START_PAGE_NUM        STM32_A_PAGE_NUM
-#define STM32_A_START_ADDR            STM32_FLASH_START_ADDR + STM32_A_START_PAGE_NUM * STM32_PAGE_SIZES
-#define OTA_UPDATA_STATUS             0x1234
-#define OTA_INFO_SIZE                 sizeof(OTA_Info)
-#define OTA_INFO_ADDR                 0x08006C00
-#define UPDATA_A_FLAG                 0x00000001
-#define IAP_XMODEM_FLAG               0X00000002
-#define IAP_XMODEMDATA_FLAG           0X00000004
-#define SET_VERSION_FLAG              0X00000008
-#define CMD_5_FLAG                    0X00000010
-#define CMD_5_XMODEM_FLAG             0X00000020
-#define CMD_6_FLAG                    0X00000040
+#define STM32_FLASH_START_ADDR        0x08000000          //stm32程序起始地址
+#define STM32_PAGE_SIZES              1024                //stm32内部flash一页的字节数
+#define STM32_PAGE_NUM                64                  //stm32内部flash的总页数
+#define STM32_A_PAGE_NUM              36                  //A区的页数
+#define STM32_B_PAGE_NUM              STM32_PAGE_NUM - STM32_A_PAGE_NUM   //B区的页数 
+#define STM32_A_START_PAGE_NUM        STM32_A_PAGE_NUM    //A区的起始页数
+#define STM32_A_START_ADDR            STM32_FLASH_START_ADDR + STM32_A_START_PAGE_NUM * STM32_PAGE_SIZES  //A区的起始地址
+#define OTA_UPDATA_STATUS             0x1234              //OTA升级标志位
+#define OTA_INFO_SIZE                 sizeof(OTA_Info)    //计算要保存在B区结构体的数据大小
+#define OTA_INFO_ADDR                 0x08006C00          //OTA数据保存的起始地址
+#define UPDATA_A_FLAG                 0x00000001          //A区升级标志位
+#define IAP_XMODEM_FLAG               0X00000002          //Xmodem传输方式标志位
+#define IAP_XMODEMDATA_FLAG           0X00000004          //Xmodem传输开始标志位
+#define SET_VERSION_FLAG              0X00000008          //设置版本信息标志位
+#define CMD_5_FLAG                    0X00000010          //命令5传输标志位（和Xmodem没有区别）
+#define CMD_5_XMODEM_FLAG             0X00000020          //命令5开始标志位（和Xmodem没有区别）
+#define CMD_6_FLAG                    0X00000040          //从外部下载程序标志位
 
 //VER-1.0.0-2024/11/5-11:00
 
 typedef struct
 {
-    uint32_t ota_flag;
-    uint32_t firelen[11];
-    uint32_t ota_version[32];
-}OTA_Info;
+    uint32_t ota_flag;        //存放OTA升级标志位
+    uint32_t firelen[11];     //存放当前程序的字节大小信息
+    uint32_t ota_version[32]; //存放OTA版本信息
+}OTA_Info;  //这些数据保存在B区的最后1K flash里面，掉电不丢失。
 
 typedef struct
 {
-    uint8_t Updatabuff[STM32_PAGE_SIZES];
-    uint32_t W25Q32_BlockNumber;
-    uint8_t Xmodemtime;
-    uint32_t Xmodemnumber;
-    uint32_t Xmodemnumcrc;
-}UpData_Info;
+    uint8_t Updatabuff[STM32_PAGE_SIZES];    //升级数据的缓存数组
+    uint32_t W25Q32_BlockNumber;             //W25Q32块信息的情况
+    uint8_t Xmodemtime;                      //Xmodem协议帧开头计时（1秒发送一次字符C给上位机表示准备接收程序）
+    uint32_t Xmodemnumber;                   //Xmodem协议接收数据包个数计算
+    uint32_t Xmodemnumcrc;                   //Xmodem协议要用到crc校验
+}UpData_Info;  //这些数据都是记录一些升级情况用的（收了多少包、存到了哪个块中等等）
 
 extern UpData_Info UpData_Info_t;
 extern OTA_Info OTA_Info_t;
