@@ -57,6 +57,7 @@ void bootloader_judge(void)
 
 uint8_t bootloader_enter(uint8_t timeout)//做进入boot loader的检测
 {
+
     wifi_printf("%d秒内输入小写 w 进入bootloader\r\n",timeout/100);
     while(timeout--)
     {

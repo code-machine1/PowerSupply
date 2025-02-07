@@ -272,6 +272,8 @@ void UART2_RX_PtrInit(void)
     WIFI_RX_Data_t.rxdata_end = &WIFI_RX_Data_t.rxdata_block[RX_DATA_BLOCK_NUM-1];
     WIFI_RX_Data_t.rx_counter = 0;
     WIFI_RX_Data_t.rxdata_in->start = WIFI_RX_Data_t.wifi_rxbuff;
+    memset(WIFI_RX_Data_t.wifi_rxbuff,0,WIFI_RX_SIZE);
+    memset(WIFI_RX_Data_t.wifi_txbuff,0,WIFI_TX_SIZE);
 }
 
 void wifi_printf(char *format,...)

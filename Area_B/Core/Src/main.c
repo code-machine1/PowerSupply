@@ -108,9 +108,8 @@ int main(void)
     __HAL_UART_ENABLE_IT(&huart2,UART_IT_IDLE);
     HAL_UART_Receive_DMA(&huart2,WIFI_RX_Data_t.rxdata_in->start,WIFI_RX_MAX);
     BSP_W25Qx_Init();
-//    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_RESET);
 //    HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_SET);
-    
+
     bootloader_judge();//判断是否跳转到A区
     /* USER CODE END 2 */
 
@@ -143,7 +142,7 @@ int main(void)
 
         if(boot_startflag & UPDATA_A_FLAG)  //开始A区更新（这个标志位在bootloader_event函数里面被置位或者清零）
         {
-            wifi_printf("长度%d字节\r\n",OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]); 
+            wifi_printf("长度%d字节\r\n",OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber]);
             if(0 == OTA_Info_t.firelen[UpData_Info_t.W25Q32_BlockNumber] % 4) //检查数据包长度
             {
                 stm32_eraseflash(STM32_A_START_PAGE_NUM,STM32_A_PAGE_NUM); //写入A区之前先擦除A区

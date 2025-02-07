@@ -89,9 +89,9 @@ void MX_GPIO_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    /* USER CODE BEGIN 2 */
+    HAL_GPIO_WritePin(WIFI_RST_GPIO_Port,WIFI_RST_Pin,GPIO_PIN_RESET);
+    /* USER CODE END 2 */
 
 }
 
-/* USER CODE BEGIN 2 */
-
-/* USER CODE END 2 */
